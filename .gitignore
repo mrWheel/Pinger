@@ -1,5 +1,7 @@
 # Credentials and other secrets
+mySecrets.h
 */mySecrets.h
+**/mySecrets.h
 
 # Prerequisites
 *.d

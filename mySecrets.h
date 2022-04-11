@@ -3,7 +3,7 @@
 ** 
 **/
 //-- use: git update-index --assume-unchanged */mySecrets.h
-//--  or: use .gitignore with a line "*/mySectrets.h"
+//--  or: use .gitignore with a line "mySectrets.h"
 
 
 #ifndef MY_SECRETS_H
