@@ -8,7 +8,7 @@
 #define _FW_VERSION   "v1.0.0 (11-04-2022)"
 #define _USE_TELEGRAM
 
-#define _BOT_MTBS  5000  //-- mean time between scan messages
+#define _BOT_MTBS  5000  //-- time between scanning messages
 /*
 
 ~~~~~~~~~~~~
@@ -32,10 +32,10 @@ C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\tools\esptool_py\3.1.0
 #include "mySecrets.h"
 #include <WiFiClientSecure.h>
 
-#define PING_DEFAULT_TIMEOUT  1
-#define PING_DEFAULT_COUNT    2
-#define PING_DEFAULT_INTERVAL 2
-#define PING_DEFAULT_SIZE    32
+#define PING_DEFAULT_TIMEOUT  5
+//#define PING_DEFAULT_COUNT    2
+//#define PING_DEFAULT_INTERVAL 2
+//#define PING_DEFAULT_SIZE    32
 #define PING_MAX_DEVICES    254 // 254
 
 #include <ESP32Ping.h>
@@ -70,8 +70,8 @@ bool  gotNtpTime = false;
 // The universal Telegram library
 // https://github.com/witnessmenow/Universal-Arduino-Telegram-Bot
 
-const char ssid[] = WIFI_SSID;    
-const char password[] = WIFI_PASSWORD;  
+const char ssid[]     = WIFI_SSID;      //-- from mySecrets.h 
+const char password[] = WIFI_PASSWORD;  //-- from mySecrets.h   
 
 #ifndef BUILTIN_LED
   #define BUILTIN_LED   2
@@ -92,6 +92,7 @@ struct _devData {
 } devData;
 
 WiFiClientSecure client;
+//-- BOTtoken from mySecrets.h -----------
 UniversalTelegramBot bot(BOTtoken, client);
 
 bool  WiFiStatus = false;
@@ -123,7 +124,7 @@ uint32_t  scanStartTime   = 0;
 void handleNewMessages(int numNewMessages, bool skip=false) 
 {
   DebugTf("handleNewMessages %s", (skip ? "Skip":""));
-  DebugTf("message #[%d]\r\n", numNewMessages);
+  Debugf("message #[%d]\r\n", numNewMessages);
 
   digitalWrite(BUILTIN_LED, !digitalRead(BUILTIN_LED));
   
@@ -197,14 +198,12 @@ void handleNewMessages(int numNewMessages, bool skip=false)
         if (deviceInfo[i].state <= -1) 
         {
           IPAddress ip (192, 168, 12, i); 
-          //if (readDeviceId(i) == i)
+          if (  !(strncasecmp("No Name", deviceInfo[i].Descr, 7)==0) )
           {
-            if (  !(strncasecmp("No Name", deviceInfo[i].Descr, 7)==0) )
-            {
-              snprintf(cBuff, sizeof(cBuff), " %3d.%03d.%03d.%03d\n", ip[0], ip[1], ip[2], ip[3]);
-              reply += String(cBuff);
-              offLineCount++;
-            }
+            snprintf(cBuff, sizeof(cBuff), " %3d.%03d.%03d.%03d - %s\n"
+                              , ip[0], ip[1], ip[2], ip[3], deviceInfo[i].Descr);
+            reply += String(cBuff);
+            offLineCount++;
           }
         }
       }
@@ -225,7 +224,9 @@ void handleNewMessages(int numNewMessages, bool skip=false)
       servIpNum = servIp.toInt();
       String servDescr = commPart.substring(spaceIdx+1);
       servDescr.trim();
-      snprintf(deviceInfo[servIpNum].Descr, sizeof(deviceInfo[0].Descr), "%-25.25s", servDescr.c_str());
+      if (servDescr == servIp) servDescr = "No Name";
+      servDescr += "                   "; // add some spaces to the end
+      snprintf(deviceInfo[servIpNum].Descr, 26, "%-25.25s", servDescr.c_str());
 
       if (readDeviceId(servIpNum) == servIpNum)
             writeDeviceId(servIpNum, deviceInfo[servIpNum].Descr, dState);
@@ -301,7 +302,7 @@ bool startWiFi()
   }
   Debugln(". connected!\r\n");
   DebugTf("Connected to SSID [%s]\r\n", WiFi.SSID());
-  DebugTf("Local IP  [%s]\r\n", WiFi.localIP());
+  DebugT("Local IP  ["); Debug(WiFi.localIP()); Debugln("]");
 
   if (!MDNS.begin(_HOSTNAME)) 
   {
@@ -367,7 +368,7 @@ void setup()
     DebugTln("Error init LittleFS ..");
   }
 
-  writeDeviceId(20, "iMac Willem", -2);
+  writeDeviceId(20, "Willem's iMac (bedraad)", -2);
   writeDeviceId(97, "No Name", -2);
   readDevices();
 /***
@@ -383,8 +384,8 @@ void setup()
   //bot.longPoll = 60;
   bot.longPoll = 5;
 
-  //client.setInsecure();
-  client.setCACert(TELEGRAM_CERTIFICATE_ROOT); 
+  //client.setCACert(TELEGRAM_CERTIFICATE_ROOT); 
+  client.setInsecure();
   
 #ifdef _USE_TELEGRAM
   String stat = "Reboot\nDevice: " + String(_HOSTNAME) + "\nVer: " + _FW_VERSION + "\nRssi: " + String(WiFi.RSSI()) + "\nip: " +  WiFi.localIP().toString() + "\n/pinger";
@@ -436,7 +437,7 @@ void loop()
   }
   
   //-- now test known UP device
-  if ((millis() - pingKnownTimer) > 10000)
+  if ((millis() - pingKnownTimer) > 20000)
   {
     pingKnownTimer = millis();
     deviceStateInx = pingKnownDevices(deviceStateInx);

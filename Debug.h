@@ -40,6 +40,8 @@ void _debugBOL(const char *, int );
 char _bol[128];
 void _debugBOL(const char *fn, int line)
 {
+  if (gotNtpTime) getLocalTime(&timeInfo);
+  
   //sprintf(_bol, "[%02d:%02d:%02d][%7u|%6u] %-12.12s(%4d): ", \
   //                timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec, \
   //                ESP.getFreeHeap(), ESP.getMaxAllocHeap(), \

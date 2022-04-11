@@ -77,7 +77,7 @@ void readDevices()
     {
       Debugf("Device: [%3d] -> [%s][%s]\r\n", atoi(cID), cDescr, cState);
     }
-    snprintf(deviceInfo[atoi(cID)].Descr, sizeof(deviceInfo[0].Descr), cDescr);
+    snprintf(deviceInfo[atoi(cID)].Descr, 26, "%-25.25s", cDescr);
     deviceInfo[atoi(cID)].Descr[25] = 0;
     deviceInfo[atoi(cID)].state     = atoi(cState);
     deviceInfo[atoi(cID)].prevState = atoi(cState);

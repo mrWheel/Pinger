@@ -3,6 +3,7 @@
 void printLocalTime()
 {
   //struct tm timeInfo; // global declared
+  getLocalTime(&timeInfo);
   if(!getLocalTime(&timeInfo))
   {
     DebugTln("Failed to obtain time");

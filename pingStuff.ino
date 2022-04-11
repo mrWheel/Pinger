@@ -8,11 +8,13 @@ int pingDevice(int devId)
   char ipBuff[20] = {};
   
   if (devId == 184) return true;
-  
+
+  digitalWrite(BUILTIN_LED, !digitalRead(BUILTIN_LED));
+
   snprintf(ipBuff, sizeof(ipBuff), "%03d.%03d.%03d.%03d", ip[0], ip[1], ip[2], devId);
   //DebugTf("ping ip[%s]\r\n", ipBuff);
   
-  if (Ping.ping(ip, 2))
+  if (Ping.ping(ip))
   {
     deviceInfo[devId].state++;
     if (deviceInfo[devId].state >  2) deviceInfo[devId].state = 2;
@@ -24,14 +26,14 @@ int pingDevice(int devId)
   }
 
   if (deviceInfo[devId].state > 1 && deviceInfo[devId].prevState > 1)
-      DebugTf("[%03d][%2d/%2d][%s] is UP\r\n", devId
+      DebugTf("[%03d][%2d/%2d] [%s] is UP\r\n", devId
                                   , deviceInfo[devId].prevState
                                   , deviceInfo[devId].state
                                   , ipBuff);
   else if (deviceInfo[devId].state < -1 && deviceInfo[devId].prevState < -1)
   { 
     if (!strncasecmp(deviceInfo[devId].Descr, ipBuff, 9)==0)
-      DebugTf("[%03d][%2d/%2d][%s] is DOWN\r\n", devId
+      DebugTf("[%03d][%2d/%2d] [%s] is DOWN\r\n", devId
                                   , deviceInfo[devId].prevState
                                   , deviceInfo[devId].state
                                   , ipBuff);
@@ -39,18 +41,18 @@ int pingDevice(int devId)
   else  
   {
     if (deviceInfo[devId].prevState > deviceInfo[devId].state)
-        DebugTf("[%03d][%2d/%2d][%s] is UP->DOWN\r\n", devId
+        DebugTf("[%03d][%2d/%2d] [%s] UP->DOWN\r\n", devId
                                                     , deviceInfo[devId].prevState
                                                     , deviceInfo[devId].state
                                                     , deviceInfo[devId].Descr);
     else if (deviceInfo[devId].prevState < deviceInfo[devId].state)
-        DebugTf("[%03d][%2d/%2d][%s] is DOWN->UP\r\n", devId
+        DebugTf("[%03d][%2d/%2d] [%s] DOWN->UP\r\n", devId
                                                     , deviceInfo[devId].prevState
                                                     , deviceInfo[devId].state
                                                     , deviceInfo[devId].Descr);
     else 
     {
-      DebugTf("[%03d][%2d/%2d][%s] is unknown\r\n", devId
+      DebugTf("[%03d][%2d/%2d] [%s] state unknown\r\n", devId
                                                     , deviceInfo[devId].prevState
                                                     , deviceInfo[devId].state
                                                     , deviceInfo[devId].Descr);
@@ -61,7 +63,7 @@ int pingDevice(int devId)
     {
       if (deviceInfo[devId].state <= -2 || deviceInfo[devId].state >= 2)
       {
-        DebugTf("[%03d][%2d/%2d][%s] has changed state!\r\n", devId
+        DebugTf("[%03d][%2d/%2d] [%s] state changed!\r\n", devId
                                           , deviceInfo[devId].prevState
                                           , deviceInfo[devId].state
                                           , ipBuff);
@@ -103,13 +105,13 @@ int pingKnownDevices(int upInx)
   //if (deviceInfo[i].state >= 1)
   if (!strncasecmp("No Name", deviceInfo[i].Descr, 7)==0)
   {
-    DebugTf("Known Device [%03d]\r\n", i);
+    DebugTf("[%03d]        [%s] Known Device\r\n", i, deviceInfo[i].Descr);
     pState = pingDevice(i);
     
     if (pState <= 0)  
-          DebugTf("[%03d] [%s] is Offline\r\n",       i, deviceInfo[i].Descr);
+          DebugTf("[%03d]        [%s] is Offline\r\n", i, deviceInfo[i].Descr);
     else if (pState < 2)            
-          DebugTf("[%03d] [%s] state is unknown\r\n", i, deviceInfo[i].Descr);
+          DebugTf("[%03d]        [%s] state is unknown\r\n", i, deviceInfo[i].Descr);
   }
   i++;
 
@@ -119,7 +121,7 @@ int pingKnownDevices(int upInx)
     yield();
   }
   if (i >= 255) i = 1;
-  DebugTf("next 'Known Device' [%03d] [%s]\r\n", i, deviceInfo[i].Descr);
+  //DebugTf("[%03d] next 'Known Device' [%s]\r\n", i, deviceInfo[i].Descr);
   return i;
   
 } //  pingKnownDevice()
