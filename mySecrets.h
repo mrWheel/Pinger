@@ -2,8 +2,8 @@
 ** This file should not be pushed to github!
 ** 
 **/
-//-- use: git update-index --assume-unchanged **/mySecrets.h
-//--  or: use .gitignore with a line "**/mySectrets.h"
+//-- use: git update-index --assume-unchanged */mySecrets.h
+//--  or: use .gitignore with a line "*/mySectrets.h"
 
 
 #ifndef MY_SECRETS_H
