@@ -1,3 +1,6 @@
+# Credentials and other secrets
+*/mySecrets.h
+
 # Prerequisites
 *.d
 
