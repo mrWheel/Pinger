@@ -18,8 +18,10 @@
 // https://github.com/witnessmenow/Universal-Arduino-Telegram-Bot
 // https://randomnerdtutorials.com/telegram-esp32-motion-detection-arduino/
 
-String chat_id = "MY-CHAR-ID";
-#define BOTtoken "MY-BOT-TOKEN"  // your Bot Token (Get from Botfather)
+//-- your Bot Chat ID (Get from Botfather)
+#define BOT_CHAT_ID "XXXXXXXXX"
+//-- your Bot Token (Get from Botfather)
+#define BOT_TOKEN   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 #endif
 
