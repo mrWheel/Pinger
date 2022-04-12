@@ -5,38 +5,40 @@
 */
 
 #define _HOSTNAME     "PINGER" 
-#define _FW_VERSION   "v1.0.0 (11-04-2022)"
+#define _FW_VERSION   "v1.0.0 (12-04-2022)"
 #define _USE_TELEGRAM
 
 #define _BOT_MTBS  5000  //-- time between scanning messages
 /*
+// ---------------------------------------------------------------
+// Non Standard Libraries - 
+// ---------------------------------------------------------------
+library ESP32Ping-master at version 1.7     in /libraries/ESP32Ping-master 
+library TelnetStream at version 1.2.2       in /libraries/TelnetStream 
+library Universal-Arduino-Telegram-Bot-master at version 1.3.0 
+                                            in /libraries/Universal-Arduino-Telegram-Bot-master 
+library ArduinoJson at version 6.19.3       in /libraries/ArduinoJson 
 
-~~~~~~~~~~~~
-
-Using library WiFi at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.2\libraries\WiFi 
-Using library WiFiClientSecure at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.2\libraries\WiFiClientSecure 
-Using library ESPmDNS at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.2\libraries\ESPmDNS 
-"C:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r2/bin/xtensa-esp32-elf-size" -A "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_57156/ESP32-CAM-Video-Telegram_8.9.ino.elf"
-Sketch uses 956193 bytes (30%) of program storage space. Maximum is 3145728 bytes.
-Global variables use 63080 bytes (19%) of dynamic memory, leaving 264600 bytes for local variables. Maximum is 327680 bytes.
-C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\tools\esptool_py\3.1.0/esptool.exe --chip esp32 --port COM7 --baud 460800 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 80m --flash_size 4MB 0xe000 C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.2/tools/partitions/boot_app0.bin 0x1000 C:\Users\James\AppData\Local\Temp\arduino_build_57156/ESP32-CAM-Video-Telegram_8.9.ino.bootloader.bin 0x10000 C:\Users\James\AppData\Local\Temp\arduino_build_57156/ESP32-CAM-Video-Telegram_8.9.ino.bin 0x8000 C:\Users\James\AppData\Local\Temp\arduino_build_57156/ESP32-CAM-Video-Telegram_8.9.ino.partitions.bin 
-
-
-*******************************************************************/
-
-// ----------------------------
+// ---------------------------------------------------------------
 // Standard Libraries - Already Installed if you have ESP32 set up
-// ----------------------------
+// ---------------------------------------------------------------
+library WiFi at version 2.0.0               /esp32/2.0.2/libraries/WiFi 
+library WiFiClientSecure at version 2.0.0   /esp32/2.0.2/libraries/WiFiClientSecure 
+library ESPmDNS at version 2.0.0            /esp32/2.0.2/libraries/ESPmDNS 
+library FS at version 2.0.0                 /esp32/2.0.2/libraries/FS 
+library LittleFS at version 2.0.0           /esp32/2.0.2/libraries/LittleFS 
+// ---------------------------------------------------------------
+*/
 
 #include <WiFi.h>
 #include "mySecrets.h"
 #include <WiFiClientSecure.h>
 
-#define PING_DEFAULT_TIMEOUT  5
-//#define PING_DEFAULT_COUNT    2
-//#define PING_DEFAULT_INTERVAL 2
-//#define PING_DEFAULT_SIZE    32
-#define PING_MAX_DEVICES    254 // 254
+#define PING_DEFAULT_TIMEOUT    2
+#define PING_DEFAULT_COUNT      2
+#define PING_DEFAULT_INTERVAL   2
+#define PING_DEFAULT_SIZE      32
+#define PING_MAX_DEVICES      254 // 254
 
 #include <ESP32Ping.h>
 
@@ -73,6 +75,9 @@ bool  gotNtpTime = false;
 const char ssid[]     = WIFI_SSID;      //-- from mySecrets.h 
 const char password[] = WIFI_PASSWORD;  //-- from mySecrets.h   
 
+String thisChatId     = BOT_CHAT_ID;    //-- from mySecrets/h
+
+
 #ifndef BUILTIN_LED
   #define BUILTIN_LED   2
 #endif
@@ -92,8 +97,8 @@ struct _devData {
 } devData;
 
 WiFiClientSecure client;
-//-- BOTtoken from mySecrets.h -----------
-UniversalTelegramBot bot(BOTtoken, client);
+//-- BOT_TOKEN from mySecrets.h -----------
+UniversalTelegramBot bot(BOT_TOKEN, client);
 
 bool  WiFiStatus = false;
 
@@ -130,7 +135,7 @@ void handleNewMessages(int numNewMessages, bool skip=false)
   
   for (int i = 0; i < numNewMessages; i++) 
   {
-    chat_id = String(bot.messages[i].chat_id);
+    thisChatId  = String(bot.messages[i].chat_id);
     String text = bot.messages[i].text;
 
     DebugTf("Got a message %s\r\n", text.c_str());
@@ -138,20 +143,24 @@ void handleNewMessages(int numNewMessages, bool skip=false)
     String from_name = bot.messages[i].from_name;
     if (from_name == "") from_name = "Guest";
 
-    String hi = "Got: ";
+    String hi = "Pinger got: ";
     hi += text;
     
-    if (!skip) bot.sendMessage(chat_id, hi, "Markdown");
+    if (!skip) bot.sendMessage(thisChatId, hi, "Markdown");
     else break;
     
     client.setHandshakeTimeout(120000);
 
-    if (text == "/pinger") 
+    if (text == "/start") 
     {
-      //snprintf(thisTime, sizeof(thisTime), "%02d:%02d:%02d 20%02d-%02d-%02d"
-      //                            , timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec
-      //                            , (timeInfo.tm_year - 100), (timeInfo.tm_mon +1), timeInfo.tm_mday);
-
+      DebugTf("start: @%04d-%02d-%02d %02d:%02d:%02d\r\n"
+                                  , timeInfo.tm_year+1900, timeInfo.tm_mon, timeInfo.tm_mday
+                                  , timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);
+      return;
+    }
+    
+    else if ( (text == "/pinger") || (text == "/start") ) 
+    {
       String reply = "Running ever since "+String(cStartTime)+"\n";
       reply += "Device: " + String(_HOSTNAME) + "\nVer: " + String(_FW_VERSION)
                      + "\nRssi: " + String(WiFi.RSSI()) + "\n";
@@ -162,7 +171,7 @@ void handleNewMessages(int numNewMessages, bool skip=false)
       reply += "/ping <*id*>\n";
       reply += "/reboot: reboot\n";
       reply += "/pinger: show this help\n";
-      bot.sendMessage(chat_id, reply, "Markdown");
+      bot.sendMessage(thisChatId, reply, "Markdown");
     }
 
     else if (text == "/up") 
@@ -184,7 +193,7 @@ void handleNewMessages(int numNewMessages, bool skip=false)
       }
       if (onlineCount==0) reply += "no online devices!\n";
       else                reply += "found *" + String(onlineCount) + "* devices";
-      bot.sendMessage(chat_id, reply, "Markdown");
+      bot.sendMessage(thisChatId, reply, "Markdown");
       return;
     }
 
@@ -209,7 +218,7 @@ void handleNewMessages(int numNewMessages, bool skip=false)
       }
       if (offLineCount==0) reply += "no *known* devices offline!\n";
       else                 reply += "found *" + String(offLineCount) + "* devices";
-      bot.sendMessage(chat_id, reply, "Markdown");
+      bot.sendMessage(thisChatId, reply, "Markdown");
       return;
     }
 
@@ -221,19 +230,25 @@ void handleNewMessages(int numNewMessages, bool skip=false)
       commPart.trim();  // remove trailing and leading spaces
       int spaceIdx  = commPart.indexOf(" ");
       String servIp = commPart.substring(0, spaceIdx);
+      servIp.trim();
       servIpNum = servIp.toInt();
       String servDescr = commPart.substring(spaceIdx+1);
       servDescr.trim();
-      if (servDescr == servIp) servDescr = "No Name";
+      DebugTf("[%s/%03d] Changed Descr form [%s] ", servIp, servIpNum, deviceInfo[servIpNum].Descr);
+      if (servDescr == servIp) 
+      {
+        servDescr = "No Name";
+      }
       servDescr += "                   "; // add some spaces to the end
       snprintf(deviceInfo[servIpNum].Descr, 26, "%-25.25s", servDescr.c_str());
+      Debugf(" to [%s]\r\n", deviceInfo[servIpNum].Descr);
 
       if (readDeviceId(servIpNum) == servIpNum)
             writeDeviceId(servIpNum, deviceInfo[servIpNum].Descr, dState);
       else  writeDeviceId(servIpNum, deviceInfo[servIpNum].Descr, -1);
 
       String reply = "Description of *" + String(servIpNum) + "* is set to *"+servDescr+"*";
-      bot.sendMessage(chat_id, reply, "Markdown");
+      bot.sendMessage(thisChatId, reply, "Markdown");
       return;
     }
     else if (strncasecmp("/ping ", text.c_str(), 6)==0 )
@@ -247,13 +262,17 @@ void handleNewMessages(int numNewMessages, bool skip=false)
         reply += " (*" + String(cDescr) + "*)";
       }
       reply += " is "; 
-      uint8_t pReply = pingDevice(servIpNum);
-      if (pReply > 0)
+      int8_t pReply = pingDevice(servIpNum, 5);
+      if (pReply >= 1)        //-- not +2
             reply += "*On*line";
-      else if (pReply < 0) 
-            reply += "*Off*Online";
-      else  reply = "*??*";
-      bot.sendMessage(chat_id, reply, "Markdown");
+      else if (pReply <= -1)  //-- not -2 
+            reply += "*Off*line";
+      else  reply += "Unknown[*"+String(pReply)+"*]";
+      DebugTln("Send Telegram:");
+      Debugln(reply);
+      //DebugTf("[%03d] before[%s]\r\n", servIpNum, deviceInfo[servIpNum].Descr);
+      bot.sendMessage(thisChatId, reply, "Markdown");
+      //DebugTf("[%03d] >after[%s]\r\n", servIpNum, deviceInfo[servIpNum].Descr);
       return;
     }
 
@@ -389,7 +408,7 @@ void setup()
   
 #ifdef _USE_TELEGRAM
   String stat = "Reboot\nDevice: " + String(_HOSTNAME) + "\nVer: " + _FW_VERSION + "\nRssi: " + String(WiFi.RSSI()) + "\nip: " +  WiFi.localIP().toString() + "\n/pinger";
-  bot.sendMessage(chat_id, stat, "");
+  bot.sendMessage(thisChatId, stat, "");
 
   int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
 
@@ -420,7 +439,7 @@ void setup()
 //----------------------------------------------------------------------------
 void loop() 
 {
-  if ((millis() - pingTimer) > 1000)
+  if ((millis() - pingTimer) > 500)
   {
     pingTimer = millis();
     ipUnderTest++;
@@ -433,11 +452,11 @@ void loop()
                                             , (millis()/1000) - scanStartTime);
       scanStartTime = millis() / 1000;
     }
-    pingDevice(ipUnderTest);
+    pingDevice(ipUnderTest, PING_DEFAULT_COUNT);
   }
   
   //-- now test known UP device
-  if ((millis() - pingKnownTimer) > 20000)
+  if ((millis() - pingKnownTimer) > 11000)
   {
     pingKnownTimer = millis();
     deviceStateInx = pingKnownDevices(deviceStateInx);
@@ -459,7 +478,7 @@ void loop()
   {
     String stat = "Rebooting on request\nVer: " + String(_FW_VERSION) + "\nRssi: " + String(WiFi.RSSI()) + "\nip: " +  WiFi.localIP().toString() ;
     Debugln(stat);
-    bot.sendMessage(chat_id, stat, "");
+    bot.sendMessage(thisChatId, stat, "");
     delay(5000);
     ESP.restart();
     delay(1000);
