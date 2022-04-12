@@ -7,22 +7,18 @@
 #define _FW_VERSION   "v1.0.0 (12-04-2022)"
 #define _USE_TELEGRAM
 /*
-   Arduino-IDE settings for ESP12 (Generic):
+   Arduino-IDE settings for ESP32 (Generic):
 
-    - Board: "Generic ESP32"
-    - Flash mode: "DOUT"
-    - Flash size: "4M (FS 2MB)"
-    - Debug port: "Disabled"
-    - Debug Level: "None"
-    - IwIP Variant: "v2 Lower Memory"
-    - Reset Method: "nodemcu"   // but will depend on the programmer!
-    - Crystal Frequency: "26 MHz"
-    - VTables: "Flash"
-    - Flash Frequency: "40MHz"
+    - Board: "ESP32 Dev Module"
+    - Upload Speed: "921600"
     - CPU Frequency: "80 MHz"
-    - Buildin Led: "2"  // GPIO02 - Pin 2
-    - Upload Speed: "115200"
-    - Erase Flash: "Only Sketch"
+    - Flash mode: "QIO"
+    - Flash size: "4M (32Mb)"
+    - Partition Scheme: "Default 4MB with spiffs (1.2MB APP/1.5MB SPIFFS)"
+    - Core Debug Level: "None"
+    - PSRAM: "Disabled"
+    - Arduino Runs On: "Core 1"
+    - Events Runs On: "Core 1"
     - Port: "?"
 
 **
@@ -46,8 +42,7 @@
 // ---------------------------------------------------------------
 library ESP32Ping-master at version 1.7     in /libraries/ESP32Ping-master
 library TelnetStream at version 1.2.2       in /libraries/TelnetStream
-library Universal-Arduino-Telegram-Bot-master at version 1.3.0
-                                            in /libraries/Universal-Arduino-Telegram-Bot-master
+library CTBot at version 2.1.8              in /libraries/CTBot 
 library ArduinoJson at version 6.19.3       in /libraries/ArduinoJson
 
 // ---------------------------------------------------------------

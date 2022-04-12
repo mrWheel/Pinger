@@ -83,9 +83,9 @@ int pingDevice(int devId, int pingCount)
           stat += String(ipBuff);
         else  stat += String(deviceInfo[devId].Descr);
         stat +=" state changed to ";
-        if      (deviceInfo[devId].state <= -2) stat += "*Off*line";
-        else if (deviceInfo[devId].state >=  2) stat += "*On*line";
-        else  /* somewhere in-between */        stat += "*error*";
+        if      (deviceInfo[devId].state <= -2) stat += "Offline";
+        else if (deviceInfo[devId].state >=  2) stat += "Online";
+        else  /* somewhere in-between */        stat += "error";
         if ((deviceInfo[devId].state <= -2) || (deviceInfo[devId].state >= 2))
         {
           DebugTf("Send telegram (chatId[%u])\r\n", thisChatId);

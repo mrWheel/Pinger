@@ -15,10 +15,10 @@ void handleNewMessages(TBMessage msg)
 
   if (msg.text == "/start")
   {
-    DebugTf("start: @%04d-%02d-%02d %02d:%02d:%02d\r\nenter: /pinger\r\n"
+    DebugTf("start: @%04d-%02d-%02d %02d:%02d:%02d\r\n"
             , timeInfo.tm_year+1900, timeInfo.tm_mon, timeInfo.tm_mday
             , timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);
-    myBot.sendMessage(msg.sender.id, "enter: /pinger");
+    myBot.sendMessage(msg.sender.id, "try: /pinger");
     return;
   }
 
