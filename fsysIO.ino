@@ -19,7 +19,7 @@ void readDevices()
   if (!LittleFS.exists(DEV_FILE)) // not found!
   {
     DebugTf("[%s] not found! Create empty one ..\r\n", DEV_FILE);
-    
+
     File f = LittleFS.open(DEV_FILE, FILE_WRITE);
     DebugT('>');
     for (int w=0; w<259; w++)
@@ -96,7 +96,7 @@ int readDeviceId(int rID)
   int32_t offset;
 
   //DebugTf("read rID[%d]\r\n", rID);
-  
+
   if (!LittleFS.exists(DEV_FILE)) // not found!
   {
     readDevices();
@@ -123,11 +123,11 @@ int readDeviceId(int rID)
   sscanf(rBuff, "%[^;];%[^;];%[^;];", cID, cDescr, cState);
   //DebugTf("Fields: [%3d/%3d] -> [%s][%s]\r\n", rID, atoi(cID), cDescr, cState);
   dState = atoi(cState);
-  
+
   f.close();
-  
+
   return atoi(cID);
-    
+
 } //  readDeviceId()
 
 
@@ -139,7 +139,7 @@ void writeDeviceId(int cID, const char *newDescr, int newState)
   int32_t offset;
 
   if (cID == 20) DebugTf("cID[%d], newName[%s], newState[%d]\r\n", cID, newDescr, newState);
-  
+
   if (cID < 1 || cID > 254)
   {
     DebugTf("deviceId must be between 1 and 254 (but is [%d])\r\n", cID);
@@ -163,7 +163,7 @@ void writeDeviceId(int cID, const char *newDescr, int newState)
   {
     DebugTf("ERROR! Device[%03d]: written [%d] bytes but should have been [%d]\r\n", cID, bytesWritten, DATA_RECLEN);
   }
-  
+
   f.close();
   //DebugTln("Done..");
   //DebugFlush();

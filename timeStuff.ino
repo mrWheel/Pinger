@@ -14,14 +14,23 @@ void printLocalTime()
   if (strlen(cStartTime) == 0)
   {
     snprintf(cStartTime, sizeof(cStartTime), "%02d:%02d:%02d 20%02d-%02d-%02d"
-                       , timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec
-                       , (timeInfo.tm_year - 100), (timeInfo.tm_mon +1), timeInfo.tm_mday);
+             , timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec
+             , (timeInfo.tm_year - 100), (timeInfo.tm_mon +1), timeInfo.tm_mday);
   }
   gotNtpTime = true;
 
 } //  printLocalTime()
 
 //===========================================================================================
-int hours()    { return (int)timeInfo.tm_hour; }
-int minutes()  { return (int)timeInfo.tm_min; }
-int seconds()  { return (int)timeInfo.tm_sec; }
+int hours()
+{
+  return (int)timeInfo.tm_hour;
+}
+int minutes()
+{
+  return (int)timeInfo.tm_min;
+}
+int seconds()
+{
+  return (int)timeInfo.tm_sec;
+}
