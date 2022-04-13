@@ -32,6 +32,9 @@ void handleNewMessages(TBMessage msg)
     reply += "/up: show Devices online\n";
     reply += "/down: show Known Devices down\n";
     reply += "/ping <id>\n";
+    reply += "/mute: don't mention state change 'No Name' devices ";
+    reply += "[" + String((muteTelegram?"On":"Off")) + "]\n";
+    reply += "/unmute: mention state change 'No Name' devices\n";
     reply += "/reboot: reboot\n";
     reply += "/pinger: show this help\n";
     myBot.sendMessage(msg.sender.id, reply);
@@ -65,14 +68,16 @@ void handleNewMessages(TBMessage msg)
     DebugTln("/down: show Known offline Devices");
     int offLineCount = 0;
     String reply = "Devices offline:\n";
-    for (int i=1; i<=255; i++)
+    for (int i=1; i<255; i++)
     {
-      if (deviceInfo[i].state <= -1)
+      //-- if not definitely "Online" 
+      if (deviceInfo[i].state < MAX_STATE)
       {
         IPAddress ip (192, 168, 12, i);
         if (  !(strncasecmp("No Name", deviceInfo[i].Descr, 7)==0) )
         {
-          snprintf(cBuff, sizeof(cBuff), " %3d.%03d.%03d.%03d - %s\n"
+          snprintf(cBuff, sizeof(cBuff), "[%2d/%2d] %3d.%03d.%03d.%03d - %s\n"
+                   , deviceInfo[i].prevState, deviceInfo[i].state
                    , ip[0], ip[1], ip[2], ip[3], deviceInfo[i].Descr);
           reply += String(cBuff);
           offLineCount++;
@@ -126,9 +131,9 @@ void handleNewMessages(TBMessage msg)
     }
     reply += " is ";
     int8_t pReply = pingDevice(servIpNum, 5);
-    if (pReply >= 1)        //-- not +2
+    if (pReply >= 1)        //-- not +MAX_STATE
       reply += "Online";
-    else if (pReply <= -1)  //-- not -2
+    else if (pReply <= -1)  //-- not -MAX_STATE
       reply += "Offline";
     else  reply += "Unknown["+String(pReply)+"]";
     DebugTln("Send Telegram:");
@@ -139,9 +144,17 @@ void handleNewMessages(TBMessage msg)
     return;
   }
 
-  else if (msg.text == "/reboot")
+  else if (msg.text == "/mute")
   {
-    reboot_request = true;
+    muteTelegram = true;
+    myBot.sendMessage(msg.sender.id, "[mute=on] don't send state change 'No Name' devices");
+    return;
+  }
+
+  else if (msg.text == "/unmute")
+  {
+    muteTelegram = false;
+    myBot.sendMessage(msg.sender.id, "[mute=off] send state change all devices");
     return;
   }
 

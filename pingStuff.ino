@@ -19,20 +19,20 @@ int pingDevice(int devId, int pingCount)
   if (Ping.ping(ip, pingCount))
   {
     deviceInfo[devId].state++;
-    if (deviceInfo[devId].state >  2) deviceInfo[devId].state = 2;
+    if (deviceInfo[devId].state >  MAX_STATE) deviceInfo[devId].state = MAX_STATE;
   }
   else
   {
     deviceInfo[devId].state--;
-    if (deviceInfo[devId].state < -2) deviceInfo[devId].state = -2;
+    if (deviceInfo[devId].state < -MAX_STATE) deviceInfo[devId].state = -MAX_STATE;
   }
 
-  if (deviceInfo[devId].state >= 2 && deviceInfo[devId].prevState >= 2)
+  if (deviceInfo[devId].state >= MAX_STATE && deviceInfo[devId].prevState >= MAX_STATE)
     DebugTf("[%03d][%2d/%2d] [%-25.25s] is UP\r\n", devId
             , deviceInfo[devId].prevState
             , deviceInfo[devId].state
             , ipBuff);
-  else if (deviceInfo[devId].state <= -2 && deviceInfo[devId].prevState <= -2)
+  else if (deviceInfo[devId].state <= -MAX_STATE && deviceInfo[devId].prevState <= -MAX_STATE)
   {
     if (!strncasecmp(deviceInfo[devId].Descr, ipBuff, 9)==0)
     {
@@ -70,9 +70,9 @@ int pingDevice(int devId, int pingCount)
     if (deviceInfo[devId].prevState != deviceInfo[devId].state)
     {
       //-- OK, state has changed (prevState != state) to "Up" or "Down"
-      if (deviceInfo[devId].state <= -2 || deviceInfo[devId].state >= 2)
+      if (deviceInfo[devId].state <= -MAX_STATE || deviceInfo[devId].state >= MAX_STATE)
       {
-        //-- state is either changed to -2 (Down) or +2 (Up) --
+        //-- state is either changed to -MAX_STATE (Down) or +MAX_STATE (Up) --
         DebugTf("[%03d][%2d/%2d] [%-25.25s] state changed!\r\n", devId
                 , deviceInfo[devId].prevState
                 , deviceInfo[devId].state
@@ -83,14 +83,19 @@ int pingDevice(int devId, int pingCount)
           stat += String(ipBuff);
         else  stat += String(deviceInfo[devId].Descr);
         stat +=" state changed to ";
-        if      (deviceInfo[devId].state <= -2) stat += "Offline";
-        else if (deviceInfo[devId].state >=  2) stat += "Online";
+        if      (deviceInfo[devId].state <= -MAX_STATE) stat += "Offline";
+        else if (deviceInfo[devId].state >=  MAX_STATE) stat += "Online";
         else  /* somewhere in-between */        stat += "error";
-        if ((deviceInfo[devId].state <= -2) || (deviceInfo[devId].state >= 2))
+        if ((deviceInfo[devId].state <= -MAX_STATE) || (deviceInfo[devId].state >= MAX_STATE))
         {
-          DebugTf("Send telegram (chatId[%u])\r\n", thisChatId);
-          Debugf("[%s]\r\n", stat.c_str());
-          myBot.sendMessage(thisChatId, stat);
+          if ( (strncasecmp("No Name", deviceInfo[devId].Descr, 7)==0) && muteTelegram)
+            DebugTf("[Mute=On] No telegram (%s)\r\n", deviceInfo[devId].Descr);
+          else
+          {
+            DebugTf("Send telegram (chatId[%u])\r\n", thisChatId);
+            Debugf("[%s]\r\n", stat.c_str());
+            myBot.sendMessage(thisChatId, stat);
+          }
         }
 #endif
         //-- update devices.csv
@@ -101,12 +106,15 @@ int pingDevice(int devId, int pingCount)
           else  writeDeviceId(devId, "No Name", deviceInfo[devId].state);
         }
         else  writeDeviceId(devId, "No Name", deviceInfo[devId].state);
-      } // state -2 || +2
+      } // state -MAX_STATE || +MAX_STATE
     } //  prevState != state
 
   }
 
-  deviceInfo[devId].prevState = deviceInfo[devId].state;
+  if ((deviceInfo[devId].state <= -MAX_STATE) || (deviceInfo[devId].state >= MAX_STATE))
+  {
+    deviceInfo[devId].prevState = deviceInfo[devId].state;
+  }
 
   return deviceInfo[devId].state;
 

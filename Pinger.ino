@@ -4,7 +4,7 @@
 
 */
 #define _HOSTNAME     "PINGER"
-#define _FW_VERSION   "v1.0.0 (12-04-2022)"
+#define _FW_VERSION   "v1.0.0 (13-04-2022)"
 #define _USE_TELEGRAM
 /*
    Arduino-IDE settings for ESP32 (Generic):
@@ -18,7 +18,7 @@
     - Core Debug Level: "None"
     - PSRAM: "Disabled"
     - Arduino Runs On: "Core 1"
-    - Events Runs On: "Core 1"
+    - Events Runs On: "Core 0"
     - Port: "?"
 
 **
@@ -65,6 +65,8 @@ library LittleFS at version 2.0.0           /esp32/2.0.2/libraries/LittleFS
 #define PING_DEFAULT_INTERVAL   2
 #define PING_DEFAULT_SIZE      32
 #define PING_MAX_DEVICES      254 // 254
+
+#define MAX_STATE               2
 
 #include <ESP32Ping.h>
 
@@ -143,7 +145,7 @@ char      cStartTime[50]  = {};
 uint32_t  pingTimer       = 0;
 uint32_t  pingKnownTimer  = 0;
 uint32_t  scanStartTime   = 0;
-
+bool      muteTelegram    = false;
 
 //----------------------------------------------------------------------------
 bool startWiFi()
@@ -247,14 +249,14 @@ void setup()
     DebugTln("Error init LittleFS ..");
   }
 
-  writeDeviceId(20, "Willem's iMac (bedraad)", -2);
-  writeDeviceId(97, "No Name", -2);
+  writeDeviceId(20, "Willem's iMac (bedraad)", -MAX_STATE);
+  writeDeviceId(97, "No Name", -MAX_STATE);
   readDevices();
   /***
     readDeviceId(20);
     deviceInfo[20].state = dState;
     DebugTf("20 state[%d], prevState[%d]\r\n", deviceInfo[20].state, deviceInfo[20].prevState);
-    writeDeviceId(20, "iMac Willem", -2);
+    writeDeviceId(20, "iMac Willem", -MAX_STATE);
     readDeviceId(20);
     deviceInfo[20].state = dState;
     DebugTf("20 state[%d], prevState[%d]\r\n", deviceInfo[20].state, deviceInfo[20].prevState);

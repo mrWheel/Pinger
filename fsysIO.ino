@@ -80,7 +80,9 @@ void readDevices()
     snprintf(deviceInfo[atoi(cID)].Descr, 26, "%-25.25s", cDescr);
     deviceInfo[atoi(cID)].Descr[25] = 0;
     deviceInfo[atoi(cID)].state     = atoi(cState);
-    deviceInfo[atoi(cID)].prevState = atoi(cState);
+    if (deviceInfo[atoi(cID)].state >= MAX_STATE)
+          deviceInfo[atoi(cID)].prevState = atoi(cState);
+    else  deviceInfo[atoi(cID)].prevState = -MAX_STATE;
   }
   f.close();
   //Debugln(". done!");
