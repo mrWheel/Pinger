@@ -149,12 +149,12 @@ int pingKnownDevices(int upInx)
   i++;
 
   //-- skip to next Up device
-  while((i < 255) && (strncasecmp("No Name", deviceInfo[i].Descr, 7)==0))
+  while((i < PING_MAX_DEVICES) && (strncasecmp("No Name", deviceInfo[i].Descr, 7)==0))
   {
     i++;
     yield();
   }
-  if (i >= 255) i = 1;
+  if (i >= PING_MAX_DEVICES) i = 1;
   //DebugTf("[%03d] next 'Known Device' [%-25.25s]\r\n", i, deviceInfo[i].Descr);
   return i;
 

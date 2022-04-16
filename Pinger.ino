@@ -4,22 +4,21 @@
 
 */
 #define _HOSTNAME     "PINGER"
-#define _FW_VERSION   "v1.0.0 (13-04-2022)"
+#define _FW_VERSION   "v1.0.0 (16-04-2022)"
 #define _USE_TELEGRAM
 /*
    Arduino-IDE settings for ESP32 (Generic):
 
-    - Board: "ESP32 Dev Module"
-    - Upload Speed: "921600"
-    - CPU Frequency: "80 MHz"
-    - Flash mode: "QIO"
-    - Flash size: "4M (32Mb)"
+    - Board           : "ESP32 Dev Module"
+    - Upload Speed    : "921600"
+    - CPU Frequency   : "240MHz (WiFi/BT)"
+    - Flash mode      : "QIO"
+    - Flash size      : "4M (32Mb)"
     - Partition Scheme: "Default 4MB with spiffs (1.2MB APP/1.5MB SPIFFS)"
     - Core Debug Level: "None"
-    - PSRAM: "Disabled"
-    - Arduino Runs On: "Core 1"
-    - Events Runs On: "Core 0"
-    - Port: "?"
+    - PSRAM           : "Disabled"
+    - Arduino Runs On : "Core 1"
+    - Events Runs On  : "Core 0"
 
 **
 ** Formatting ( http://astyle.sourceforge.net/astyle.html#_Quick_Start )
